@@ -39,17 +39,19 @@ def main():
     logging.info("Taking pictures every {} seconds.".format(args.seconds))
     logging.info("They will be stored as {}.".format(filename_template))
     try:
-        with picamera.PiCamera() as camera:
-            camera.resolution = resolution
-            #camera.start_preview()
-            wait((datetime.now() + timedelta(seconds=1)).replace(microsecond=0))
+        camera = picamera.PiCamera()
+        camera.resolution = resolution
+        #camera.start_preview()
+        wait((datetime.now() + timedelta(seconds=1)).replace(microsecond=0))
+        until = (datetime.now() + timedelta(seconds=args.seconds)).replace(microsecond=0)
+        for filename in camera.capture_continuous(filename_template):
+            logging.info('Captured %s' % filename)
+            wait(until)
             until = (datetime.now() + timedelta(seconds=args.seconds)).replace(microsecond=0)
-            for filename in camera.capture_continuous(filename_template):
-                logging.info('Captured %s' % filename)
-                wait(until)
-                until = (datetime.now() + timedelta(seconds=args.seconds)).replace(microsecond=0)
     except KeyboardInterrupt:
         logging.info("Ctrl-C pressed. Stopping...")
+    finally:
+        camera.close()
 
 if __name__ == "__main__":
     main()
